@@ -1,0 +1,31 @@
+version: "3.8"
+services:
+  # 1. Centero 게이트웨이 역할을 할 Modbus 서버
+  modbus-gateway:
+    image: oitc/modbus-server:latest # 또는 직접 만든 simple python modbus server
+    ports:
+      - "502:502"
+    networks:
+      - iiot-network
+
+  # 2. Python 센서 에뮬레이터
+  sensor-emulator:
+    build: ./sensor-emulator
+    depends_on:
+      - modbus-gateway
+    networks:
+      - iiot-network
+
+  # 3. Java Spring Boot 모니터링 시스템
+  monitoring-app:
+    build: ./monitoring-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - modbus-gateway
+    networks:
+      - iiot-network
+
+networks:
+  iiot-network:
+    driver: bridge
