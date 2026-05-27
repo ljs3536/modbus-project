@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>IIoT Sensor Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div style="width: 80%; margin: 20px auto;">
+    <h2>실시간 센서 Leak 모니터링</h2>
+    <canvas id="sensorChart"></canvas>
+</div>
+
+<script>
+    const ctx = document.getElementById('sensorChart').getContext('2d');
+    const sensorChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: [], datasets: [{ label: 'Sensor Value', data: [], borderColor: 'blue', tension: 0.1 }] },
+        options: { animation: false, scales: { y: { suggestedMin: 0, suggestedMax: 0.15 } } }
+    });
+
+    // 1초마다 서버(Spring Boot API)에서 데이터 가져와서 차트에 추가
+    setInterval(() => {
+        fetch('/api/data')
+            .then(response => response.json())
+            .then(data => {
+                const time = new Date().toLocaleTimeString();
+                sensorChart.data.labels.push(time);
+                sensorChart.data.datasets[0].data.push(data);
+
+                if(sensorChart.data.labels.length > 20) { // 데이터 20개 넘으면 과거 데이터 삭제
+                    sensorChart.data.labels.shift();
+                    sensorChart.data.datasets[0].data.shift();
+                }
+                sensorChart.update();
+            });
+    }, 1000);
+</script>
+</body>
+</html>

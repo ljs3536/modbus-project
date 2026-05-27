@@ -1,8 +1,8 @@
 version: "3.8"
 services:
-  # 1. Centero 게이트웨이 역할을 할 Modbus 서버
+  # 1. 내가 직접 만든 Modbus 게이트웨이
   modbus-gateway:
-    image: oitc/modbus-server:latest # 또는 직접 만든 simple python modbus server
+    build: ./modbus-gateway
     ports:
       - "502:502"
     networks:
@@ -18,7 +18,7 @@ services:
 
   # 3. Java Spring Boot 모니터링 시스템
   monitoring-app:
-    build: ./monitoring-app
+    build: ./app
     ports:
       - "8080:8080"
     depends_on:
